@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MASH</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background-color: #fdf6e3;
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 4rem;
+      letter-spacing: 12px;
+      margin-bottom: 4px;
+      color: #3a3a3a;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 30px;
+      letter-spacing: 2px;
+    }
+
+    .mash-letters {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .mash-letter {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+      border: 3px solid;
+    }
+
+    .mash-letter.M { border-color: #e05252; color: #e05252; }
+    .mash-letter.A { border-color: #4a90d9; color: #4a90d9; }
+    .mash-letter.S { border-color: #4caf7d; color: #4caf7d; }
+    .mash-letter.H { border-color: #e0a020; color: #e0a020; }
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 750px;
+      margin: 0 auto 30px;
+    }
+
+    .cat-card {
+      background: #fff;
+      border: 1px solid #e0d8c8;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .cat-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #999;
+      margin-bottom: 10px;
+      font-family: Arial, sans-serif;
+    }
+
+    .cat-card input {
+      display: block;
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #e0d8c8;
+      background: transparent;
+      padding: 5px 2px;
+      font-size: 0.9rem;
+      color: #333;
+      font-family: Georgia, serif;
+      margin-bottom: 6px;
+      outline: none;
+    }
+
+    .cat-card input:focus { border-bottom-color: #aaa; }
+    .cat-card input:last-child { margin-bottom: 0; }
+
+    .spiral-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .spiral-section p {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 10px;
+      font-family: Arial, sans-serif;
+    }
+
+    #spiralCanvas {
+      border: 1px solid #e0d8c8;
+      border-radius: 10px;
+      background: #fff;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .lucky-num {
+      font-size: 1.5rem;
+      text-align: center;
+      color: #3a3a3a;
+      min-height: 40px;
+      margin: 10px 0 20px;
+      font-family: Arial, sans-serif;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 10px 28px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+      transition: background 0.15s;
+    }
+
+    button:hover { background: #f0ece0; }
+
+    button.primary {
+      background: #3a3a3a;
+      color: #fff;
+      border-color: #3a3a3a;
+    }
+
+    button.primary:hover { background: #555; }
+
+    .result-section {
+      display: none;
+      max-width: 750px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #e0d8c8;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .result-section.show { display: block; }
+
+    .result-title {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+      color: #3a3a3a;
+    }
+
+    .result-mash {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      letter-spacing: 4px;
+    }
+
+    .result-mash.M { color: #e05252; }
+    .result-mash.A { color: #4a90d9; }
+    .result-mash.S { color: #4caf7d; }
+    .result-mash.H { color: #e0a020; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .result-item {
+      background: #fdf6e3;
+      border: 1px solid #e0d8c8;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .result-item .r-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #aaa;
+      margin-bottom: 6px;
+      font-family: Arial, sans-serif;
+    }
+
+    .result-item .r-val {
+      font-size: 1rem;
+      color: #3a3a3a;
+    }
+
+    .counting-display {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #aaa;
+      min-height: 24px;
+      margin-bottom: 10px;
+      font-family: Arial, sans-serif;
+    }
+
+    @media (max-width: 560px) {
+      .categories { grid-template-columns: repeat(2, 1fr); }
+      .result-grid { grid-template-columns: repeat(2, 1fr); }
+      h1 { font-size: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+    <a href="fromScratch.html">← Back to Woodworking</a>
+
+  <h1>M·A·S·H</h1>
+  <p class="subtitle">Mansion &nbsp;·&nbsp; Apartment &nbsp;·&nbsp; Shack &nbsp;·&nbsp; House</p>
+
+  <div class="mash-letters">
+    <div class="mash-letter M">M</div>
+    <div class="mash-letter A">A</div>
+    <div class="mash-letter S">S</div>
+    <div class="mash-letter H">H</div>
+  </div>
+
+  <div class="categories">
+    <div class="cat-card">
+      <div class="cat-title">Spouse</div>
+      <input placeholder="e.g. Leo DiCaprio" data-cat="spouse" data-i="0">
+      <input placeholder="e.g. Harry Styles" data-cat="spouse" data-i="1">
+      <input placeholder="e.g. Pedro Pascal" data-cat="spouse" data-i="2">
+      <input placeholder="e.g. Timothée C." data-cat="spouse" data-i="3">
+    </div>
+    <div class="cat-card">
+      <div class="cat-title">Car</div>
+      <input placeholder="e.g. Mercedes" data-cat="car" data-i="0">
+      <input placeholder="e.g. Tesla" data-cat="car" data-i="1">
+      <input placeholder="e.g. Kia" data-cat="car" data-i="2">
+      <input placeholder="e.g. Porsche" data-cat="car" data-i="3">
+    </div>
+    <div class="cat-card">
+      <div class="cat-title">Job</div>
+      <input placeholder="e.g. Astronaut" data-cat="job" data-i="0">
+      <input placeholder="e.g. SNL Writer" data-cat="job" data-i="1">
+      <input placeholder="e.g. Chef" data-cat="job" data-i="2">
+      <input placeholder="e.g. Actress" data-cat="job" data-i="3">
+    </div>
+    <div class="cat-card">
+      <div class="cat-title">Live in</div>
+      <input placeholder="e.g. Hawaii" data-cat="city" data-i="0">
+      <input placeholder="e.g. San Francisco" data-cat="city" data-i="1">
+      <input placeholder="e.g. Chicago" data-cat="city" data-i="2">
+      <input placeholder="e.g. Paris" data-cat="city" data-i="3">
+    </div>
+    <div class="cat-card">
+      <div class="cat-title">Money</div>
+      <input placeholder="e.g. $1 million" data-cat="money" data-i="0">
+      <input placeholder="e.g. $1 billion" data-cat="money" data-i="1">
+      <input placeholder="e.g. $24" data-cat="money" data-i="2">
+      <input placeholder="e.g. $100k" data-cat="money" data-i="3">
+    </div>
+    <div class="cat-card">
+      <div class="cat-title">Pet</div>
+      <input placeholder="e.g. Dog" data-cat="pet" data-i="0">
+      <input placeholder="e.g. Cat" data-cat="pet" data-i="1">
+      <input placeholder="e.g. Snake" data-cat="pet" data-i="2">
+      <input placeholder="e.g. Bunny" data-cat="pet" data-i="3">
+    </div>
+  </div>
+
+  <div class="spiral-section">
+    <p id="spiralPrompt">Draw a spiral below to get your lucky number</p>
+    <canvas id="spiralCanvas" width="280" height="280"></canvas>
+  </div>
+
+  <div class="lucky-num" id="luckyNum"></div>
+  <div class="counting-display" id="countingDisplay"></div>
+
+  <div class="btn-row">
+    <button onclick="resetGame()">Reset</button>
+    <button class="primary" id="goBtn" onclick="revealFate()" disabled>Reveal my fate</button>
+  </div>
+
+  <div class="result-section" id="resultSection">
+    <p class="result-title">Your future has been decided...</p>
+    <div class="result-mash" id="resultMash"></div>
+    <div class="result-grid" id="resultGrid"></div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('spiralCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let strokePoints = 0;
+    let luckyNumber = 0;
+    let hasNumber = false;
+
+    ctx.strokeStyle = '#9b7ec8';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    function getPos(e) {
+      const r = canvas.getBoundingClientRect();
+      if (e.touches) {
+        return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+      }
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+
+    canvas.addEventListener('mousedown', e => {
+      drawing = true;
+      strokePoints = 0;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+    });
+
+    canvas.addEventListener('mousemove', e => {
+      if (!drawing) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      strokePoints++;
+    });
+
+    canvas.addEventListener('mouseup', finishSpiral);
+    canvas.addEventListener('mouseleave', finishSpiral);
+
+    canvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      drawing = true;
+      strokePoints = 0;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (!drawing) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      strokePoints++;
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', finishSpiral);
+
+    function finishSpiral() {
+      if (!drawing) return;
+      drawing = false;
+      if (strokePoints < 5) return;
+      luckyNumber = Math.max(3, Math.min(20, Math.round(strokePoints / 10)));
+      hasNumber = true;
+      document.getElementById('luckyNum').textContent = 'Lucky number: ' + luckyNumber;
+      document.getElementById('spiralPrompt').textContent = 'Lucky number locked in!';
+      document.getElementById('goBtn').disabled = false;
+    }
+
+    function getVal(cat, i) {
+      const inp = document.querySelector(`input[data-cat="${cat}"][data-i="${i}"]`);
+      return inp.value.trim() || inp.placeholder.replace('e.g. ', '');
+    }
+
+    function revealFate() {
+      if (!hasNumber) return;
+
+      const mashOptions = [
+        { list: 'mash', val: 'M' },
+        { list: 'mash', val: 'A' },
+        { list: 'mash', val: 'S' },
+        { list: 'mash', val: 'H' },
+      ];
+
+      const catKeys = ['spouse', 'car', 'job', 'city', 'money', 'pet'];
+      const catItems = [];
+      catKeys.forEach(cat => {
+        for (let i = 0; i < 4; i++) {
+          catItems.push({ list: cat, val: getVal(cat, i) });
+        }
+      });
+
+      const allItems = [...mashOptions, ...catItems];
+      const eliminated = new Array(allItems.length).fill(false);
+
+      let counter = 0;
+      let pos = 0;
+
+      while (true) {
+        if (!eliminated[pos % allItems.length]) {
+          counter++;
+          if (counter === luckyNumber) {
+            counter = 0;
+            const idx = pos % allItems.length;
+            const cat = allItems[idx].list;
+            const remainingInCat = allItems.filter((item, i) => item.list === cat && !eliminated[i]).length;
+            if (remainingInCat > 1) {
+              eliminated[idx] = true;
+            }
+          }
+        }
+
+        pos++;
+
+        const done = ['mash', ...catKeys].every(cat => {
+          return allItems.filter((item, i) => item.list === cat && !eliminated[i]).length === 1;
+        });
+        if (done) break;
+        if (pos > 50000) break;
+      }
+
+      const survivors = allItems.filter((_, i) => !eliminated[i]);
+      const mashWinner = survivors.find(s => s.list === 'mash');
+      const homeMap = { M: 'Mansion', A: 'Apartment', S: 'Shack', H: 'House' };
+
+      const mashEl = document.getElementById('resultMash');
+      mashEl.textContent = homeMap[mashWinner.val] || mashWinner.val;
+      mashEl.className = 'result-mash ' + mashWinner.val;
+
+      const grid = document.getElementById('resultGrid');
+      grid.innerHTML = `
+        <div class="result-item"><div class="r-label">Spouse</div><div class="r-val">${survivors.find(s => s.list === 'spouse').val}</div></div>
+        <div class="result-item"><div class="r-label">Car</div><div class="r-val">${survivors.find(s => s.list === 'car').val}</div></div>
+        <div class="result-item"><div class="r-label">Job</div><div class="r-val">${survivors.find(s => s.list === 'job').val}</div></div>
+        <div class="result-item"><div class="r-label">Lives in</div><div class="r-val">${survivors.find(s => s.list === 'city').val}</div></div>
+        <div class="result-item"><div class="r-label">Money</div><div class="r-val">${survivors.find(s => s.list === 'money').val}</div></div>
+        <div class="result-item"><div class="r-label">Pet</div><div class="r-val">${survivors.find(s => s.list === 'pet').val}</div></div>
+      `;
+
+      document.getElementById('resultSection').classList.add('show');
+      document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetGame() {
+      document.querySelectorAll('input[data-cat]').forEach(inp => inp.value = '');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      strokePoints = 0;
+      luckyNumber = 0;
+      hasNumber = false;
+      document.getElementById('luckyNum').textContent = '';
+      document.getElementById('spiralPrompt').textContent = 'Draw a spiral below to get your lucky number';
+      document.getElementById('goBtn').disabled = true;
+      document.getElementById('resultSection').classList.remove('show');
+      document.getElementById('countingDisplay').textContent = '';
+    }
+  </script>
+
+</body>
+</html>
